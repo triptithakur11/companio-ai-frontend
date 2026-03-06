@@ -2,21 +2,38 @@ import { useState } from "react";
 import MessageBubble from "./MessageBubble";
 import ChatInput from "./ChatInput";
 
-export default function ChatWindow({ sendMessage }) {
+export default function ChatWindow({ messages, setMessages, sendMessage }) {
 
-  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const handleSend = async (text) => {
+  const handleSend = async (data) => {
 
-    const userMsg = { role: "user", content: text };
+    if (data.type === "text") {
+      setMessages((prev) => [
+        ...prev,
+        { role: "user", content: data.text }
+      ]);
+    }
 
-    setMessages((prev) => [...prev, userMsg]);
+    if (data.type === "file") {
+      setMessages((prev) => [
+        ...prev,
+        { role: "user", content: `📎 ${data.file.name}` }
+      ]);
+    }
 
-    const reply = await sendMessage(text);
+    if (data.type === "voice") {
+      setMessages((prev) => [
+        ...prev,
+        { role: "user", content: "🎤 Voice Message" }
+      ]);
+    }
 
-    const aiMsg = { role: "assistant", content: reply };
+    setLoading(true);
 
-    setMessages((prev) => [...prev, aiMsg]);
+    await sendMessage(data);
+
+    setLoading(false);
   };
 
   return (
@@ -29,11 +46,12 @@ export default function ChatWindow({ sendMessage }) {
           <MessageBubble key={i} {...m} />
         ))}
 
+        {loading && <div>AI thinking...</div>}
+
       </div>
 
       <ChatInput onSend={handleSend} />
 
     </div>
-
   );
 }
