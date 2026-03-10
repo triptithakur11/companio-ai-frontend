@@ -1,11 +1,22 @@
-import { Layout, Menu } from "antd";
-import { DashboardOutlined, FlagOutlined } from "@ant-design/icons";
+import { Button, Layout, Menu, message } from "antd";
+import {
+  DashboardOutlined,
+  FlagOutlined,
+  LogoutOutlined,
+} from "@ant-design/icons";
 import { useContext } from "react";
 import { ThemeContext } from "../../context/ThemeContext";
+import { removeToken } from "../../utils/storage";
 const { Sider } = Layout;
 
 const Sidebar = ({ navigate }) => {
   const { theme } = useContext(ThemeContext);
+
+  const logout = () => {
+    removeToken();
+    message.success("Logged out successfully");
+    navigate("/login");
+  };
 
   return (
     <Sider
@@ -42,6 +53,16 @@ const Sidebar = ({ navigate }) => {
           </Menu.Item>
         </Menu.SubMenu>
       </Menu>
+      <Button
+        style={{ position: "absolute", bottom: 20, left: 40 }}
+        danger
+        ghost
+        type="primary"
+        icon={<LogoutOutlined />}
+        onClick={logout}
+      >
+        Logout
+      </Button>
     </Sider>
   );
 };
