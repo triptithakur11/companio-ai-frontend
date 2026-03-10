@@ -4,7 +4,6 @@ import { setToken, removeToken } from "../utils/storage";
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-
   const [user, setUser] = useState(null);
 
   const login = (userData, token) => {

@@ -1,20 +1,18 @@
 import { PieChart, Pie, Tooltip } from "recharts";
 
-const data = [
-  { name: "Completed", value: 8 },
-  { name: "In Progress", value: 4 },
-  { name: "Pending", value: 3 },
-];
+export default function GoalProgressChart({ goals }) {
+  if (!goals?.length) return null;
+  const doneCount = goals.filter((g) => g.isDone).length;
+  const pendingCount = goals.length - doneCount;
 
-export default function GoalProgressChart() {
+  const data = [
+    { name: "Completed", value: doneCount },
+    { name: "Pending", value: pendingCount },
+  ];
 
   return (
     <PieChart width={300} height={250}>
-      <Pie
-        data={data}
-        dataKey="value"
-        outerRadius={90}
-      />
+      <Pie data={data} dataKey="value" outerRadius={90} />
       <Tooltip />
     </PieChart>
   );

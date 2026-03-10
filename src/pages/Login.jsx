@@ -9,7 +9,6 @@ export default function Login() {
     try {
       const res = await apiClient.post("/auth/login", values);
       const token = res.data.token;
-      console.log(res.data);
       localStorage.setItem("token", token);
 
       message.success("Login successful");

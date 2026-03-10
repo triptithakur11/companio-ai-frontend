@@ -1,38 +1,68 @@
-export const SERVICES = [
-
-  {
-    id: 1,
+export const SERVICES = {
+  goals: {
+    chatId: 1,
+    agentId: "1",
     name: "Goal Mapping",
+    description: "Convert your goals into structured roadmaps.",
     icon: "FlagOutlined",
-    description: "Break large goals into structured steps."
+    color: "#001529",
+    backgroundColor: "#fff",
+    textColor: "#000",
+    borderColor: "#000",
   },
-
-  {
-    id: 2,
+  notes: {
+    chatId: 2,
+    agentId: "6",
     name: "Smart Notes",
+    description: "Convert messy notes into structured study material.",
     icon: "FileTextOutlined",
-    description: "Convert messy notes into structured study material."
+    color: "#001529",
+    backgroundColor: "#fff",
+    textColor: "#000",
+    borderColor: "#000",
   },
-
-  {
-    id: 3,
+  revision: {
+    chatId: 3,
+    agentId: "2",
     name: "Smart Revision",
+    description: "AI asks questions to help active recall.",
     icon: "BulbOutlined",
-    description: "AI asks questions to help active recall."
+    color: "#001529",
+    backgroundColor: "#fff",
+    textColor: "#000",
+    borderColor: "#000",
   },
-
-  {
-    id: 4,
+  concepts: {
+    chatId: 6,
+    agentId: "3",
     name: "Concept Simplifier",
+    description: "Explain complex concepts simply.",
     icon: "BookOutlined",
-    description: "Explain complex concepts simply."
+    color: "#001529",
+    backgroundColor: "#fff",
+    textColor: "#000",
+    borderColor: "#000",
   },
-
-  {
-    id: 5,
+  support: {
+    chatId: 7,
+    agentId: "5",
     name: "Human Support",
+    description: "Get help from mentors.",
     icon: "UserOutlined",
-    description: "Get help from mentors."
+    color: "#001529",
+    backgroundColor: "#fff",
+    textColor: "#000",
+    borderColor: "#000",
   },
-
-];
+  resources: {
+    chatId: 4,
+    agentId: "4",
+    name: "Curated Resources",
+    description: "Best study material recommended by AI.",
+    icon: "BookOutlined",
+    color: "#001529",
+    backgroundColor: "#fff",
+    textColor: "#000",
+    borderColor: "#000",
+  },
+};

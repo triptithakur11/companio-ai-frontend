@@ -5,7 +5,6 @@ import { ThemeContext } from "../../context/ThemeContext";
 const { Header } = Layout;
 
 export default function HeaderBar() {
-
   const { theme, toggleTheme } = useContext(ThemeContext);
 
   return (
@@ -14,11 +13,10 @@ export default function HeaderBar() {
         background: "#fff",
         display: "flex",
         justifyContent: "space-between",
-        alignItems: "center"
+        alignItems: "center",
       }}
     >
-
-      <h3>Companio AI</h3>
+      <h2>Companio AI</h2>
 
       <Switch
         checked={theme === "dark"}
@@ -26,7 +24,6 @@ export default function HeaderBar() {
         checkedChildren="Dark"
         unCheckedChildren="Light"
       />
-
     </Header>
   );
 }
