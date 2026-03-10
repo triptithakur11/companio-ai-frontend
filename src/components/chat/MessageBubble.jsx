@@ -45,7 +45,7 @@ export default function MessageBubble({ message }) {
       const cleanText = cleanTextForSpeech(text);
 
       const res = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/revision/text-to-speech`,
+        `https://companio-ai-backend-tripti.azurewebsites.net/revision/text-to-speech`,
         {
           method: "POST",
           headers: {
