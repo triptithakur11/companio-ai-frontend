@@ -1,19 +1,31 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { FiVolume2 } from "react-icons/fi";
 import { FaWaveSquare } from "react-icons/fa";
-import { Image } from "antd";
+import { Image, Switch } from "antd";
 
 export default function MessageBubble({ message }) {
-  const { role, text, voice, files = [] } = message;
+  const { role, text, voice, files = [], hasText = true } = message;
   const isUser = role === "user";
 
   const [loading, setLoading] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [selectedVoice, setSelectedVoice] = useState("female");
 
+  const [showText, setShowText] = useState(hasText);
+
   const audioRef = useRef(null);
+
+  useEffect(() => {
+    if (!isUser && voice && message.autoPlay) {
+      setTimeout(() => {
+        if (audioRef.current) {
+          audioRef.current.play().catch(() => {});
+        }
+      }, 300);
+    }
+  }, [voice, message.autoPlay]);
 
   const cleanTextForSpeech = (input) => {
     if (!input) return "";
@@ -29,12 +41,12 @@ export default function MessageBubble({ message }) {
   };
 
   const speakMessage = async () => {
-    if (!text) return;
+    const audioEl = audioRef.current;
+    if (!audioEl) return;
 
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current = null;
+    if (!audioEl.paused) {
+      audioEl.pause();
+      audioEl.currentTime = 0;
       setSpeaking(false);
       return;
     }
@@ -42,37 +54,37 @@ export default function MessageBubble({ message }) {
     try {
       setLoading(true);
 
-      const cleanText = cleanTextForSpeech(text);
+      if (voice) {
+        audioEl.play();
+        setSpeaking(true);
+        setLoading(false);
+        return;
+      }
 
-      const res = await fetch(
-        `https://companio-ai-backend-tripti.azurewebsites.net/revision/text-to-speech`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+      if (text) {
+        const cleanText = cleanTextForSpeech(text);
+        const res = await fetch(
+          `https://companio-ai-backend-tripti-new.azurewebsites.net/revision/text-to-speech`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              text: cleanText,
+              voice: selectedVoice,
+            }),
           },
-          body: JSON.stringify({
-            text: cleanText,
-            voice: selectedVoice,
-          }),
-        },
-      );
+        );
 
-      const blob = await res.blob();
-      const audioUrl = URL.createObjectURL(blob);
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
 
-      const audio = new Audio(audioUrl);
-      audioRef.current = audio;
+        audioEl.src = url;
+        await audioEl.play();
+
+        setSpeaking(true);
+      }
 
       setLoading(false);
-      setSpeaking(true);
-
-      audio.play();
-
-      audio.onended = () => {
-        setSpeaking(false);
-        audioRef.current = null;
-      };
     } catch (err) {
       console.error(err);
       setLoading(false);
@@ -80,10 +92,12 @@ export default function MessageBubble({ message }) {
     }
   };
 
-  const isImage = (url) => /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
+  const isImage = (file) =>
+    file?.type?.startsWith("image") ||
+    /\.(jpg|jpeg|png|gif|webp)$/i.test(file?.url || file);
 
   const imageFiles = files.filter(isImage);
-  const otherFiles = files.filter((url) => !isImage(url));
+  const otherFiles = files.filter((f) => !isImage(f));
 
   return (
     <div
@@ -106,7 +120,20 @@ export default function MessageBubble({ message }) {
           gap: 8,
         }}
       >
-        {text && (
+        {!isUser && text && !hasText && (
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 12 }}>
+              {showText ? "📄 Text" : "🔊 Voice"}
+            </span>
+            <Switch
+              size="small"
+              checked={showText}
+              onChange={(checked) => setShowText(checked)}
+            />
+          </div>
+        )}
+
+        {showText && text && (
           <div>
             {isUser ? (
               text
@@ -118,10 +145,10 @@ export default function MessageBubble({ message }) {
 
         {imageFiles.length > 0 && (
           <Image.PreviewGroup>
-            {imageFiles.map((url, index) => (
+            {imageFiles.map((file, index) => (
               <Image
                 key={index}
-                src={url}
+                src={file.url || file}
                 width={220}
                 style={{ borderRadius: 8 }}
               />
@@ -145,18 +172,19 @@ export default function MessageBubble({ message }) {
           </a>
         ))}
 
-        {voice && (
+        {!showText && voice && (
           <audio
+            ref={audioRef}
             controls
             src={voice}
-            style={{
-              width: "220px",
-              marginTop: 4,
-            }}
+            style={{ width: "220px", marginTop: 4 }}
+            onPlay={() => setSpeaking(true)}
+            onPause={() => setSpeaking(false)}
+            onEnded={() => setSpeaking(false)}
           />
         )}
 
-        {!isUser && text && (
+        {!isUser && text && showText && (
           <div
             style={{
               display: "flex",

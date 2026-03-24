@@ -41,22 +41,26 @@ export default function Service({ service }) {
     try {
       const formData = new FormData();
 
+      // TEXT
       if (data.text) {
         formData.append("message", data.text);
       }
 
+      // LANGUAGE
+      if (data.language) {
+        formData.append("targetLang", data.language);
+      }
+
+      // FILES
       if (data.files && data.files.length > 0) {
         data.files.forEach((file) => {
           formData.append("files", file);
         });
       }
 
+      // VOICE
       if (data.voice) {
         formData.append("voice", data.voice);
-      }
-
-      if (data.language) {
-        formData.append("targetLang", data.language);
       }
 
       const res = await apiClient.post(
@@ -66,25 +70,11 @@ export default function Service({ service }) {
           headers: {
             "Content-Type": "multipart/form-data",
           },
+          timeout: 60000, // prevent cancel
           transformRequest: [(data) => data],
         },
       );
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "user",
-          text: data.text || "",
-          files: res?.data?.filesUrls || [],
-          voice: res?.data?.voiceUrl || null,
-        },
-        {
-          role: "assistant",
-          text: res?.data?.reply || "",
-          files: [],
-          voice: null,
-        },
-      ]);
+      return res;
     } catch (err) {
       message.error("Failed to send message: " + err.response.data.error);
       console.error("Send message error:", err);

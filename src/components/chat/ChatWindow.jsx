@@ -30,27 +30,65 @@ export default function ChatWindow({ messages, setMessages, sendMessage }) {
   };
 
   const handleSend = async (data) => {
-    if (data.type === "text") {
-      setMessages((prev) => [...prev, { role: "user", content: data.text }]);
+    if (loading) return;
+    console.log(data);
+    let userMessage = {
+      role: "user",
+      text: null,
+      files: [],
+      voice: null,
+      hasText: false,
+    };
+
+    // TEXT
+    if (data.text && data.text.trim() !== "") {
+      userMessage.text = data.text;
+      userMessage.hasText = true;
     }
 
-    if (data.type === "file") {
-      setMessages((prev) => [
-        ...prev,
-        { role: "user", content: `📎 ${data.file.name}` },
-      ]);
+    // FILES (convert to preview URLs)
+    if (data.files && data.files.length > 0) {
+      userMessage.files = data.files.map((file) => {
+        if (typeof file === "string") return file;
+
+        return {
+          url: URL.createObjectURL(file),
+          name: file.name,
+          type: file.type,
+        };
+      });
     }
 
-    if (data.type === "voice") {
-      setMessages((prev) => [
-        ...prev,
-        { role: "user", content: "🎤 Voice Message" },
-      ]);
+    // VOICE
+    if (data.voice) {
+      userMessage.voice =
+        typeof data.voice === "string"
+          ? data.voice
+          : URL.createObjectURL(data.voice);
     }
+
+    // FINAL PUSH (only once)
+    setMessages((prev) => [...prev, { ...userMessage }]);
 
     setLoading(true);
-    await sendMessage(data);
-    setLoading(false);
+
+    try {
+      const res = await sendMessage(data);
+      console.log(res?.data);
+      const aiMessage = {
+        role: "assistant",
+        text: res?.data?.reply || "",
+        voice: res?.data?.voiceUrl || null,
+        files: res?.data?.filesUrls || [],
+        hasText: !res?.data?.voiceUrl,
+        autoPlay: true,
+      };
+      setMessages((prev) => [...prev, { ...aiMessage }]);
+    } catch (err) {
+      console.error("Send error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

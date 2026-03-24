@@ -2,7 +2,8 @@ import axios from "axios";
 import { getToken } from "../utils/storage";
 
 const apiClient = axios.create({
-  baseURL: 'https://companio-ai-backend-tripti.azurewebsites.net',
+  baseURL: "https://companio-ai-backend-tripti-new.azurewebsites.net/",
+  // baseURL: 'http://localhost:3000',
   timeout: 15000,
 });
 
