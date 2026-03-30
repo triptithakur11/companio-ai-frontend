@@ -11,51 +11,74 @@ export default function MessageBubble({ message }) {
 
   const [loading, setLoading] = useState(false);
   const [speaking, setSpeaking] = useState(false);
-  const [selectedVoice, setSelectedVoice] = useState("female");
-
   const [showText, setShowText] = useState(hasText);
 
   const audioRef = useRef(null);
+  const [userInteracted, setUserInteracted] = useState(false);
 
   useEffect(() => {
-    if (!isUser && voice && message.autoPlay) {
-      setTimeout(() => {
-        if (audioRef.current) {
-          audioRef.current.play().catch(() => {});
+    const handleClick = () => setUserInteracted(true);
+    window.addEventListener("click", handleClick, { once: true });
+
+    return () => window.removeEventListener("click", handleClick);
+  }, []);
+
+  useEffect(() => {
+    if (!isUser && voice && message.autoPlay && userInteracted) {
+      const audioEl = audioRef.current;
+      if (!audioEl) return;
+
+      const timer = setTimeout(async () => {
+        try {
+          await audioEl.play();
+          setSpeaking(true);
+        } catch (err) {
+          console.log("Autoplay blocked");
         }
-      }, 300);
+      }, 400);
+
+      return () => clearTimeout(timer);
     }
-  }, [voice, message.autoPlay]);
+  }, [voice, message.autoPlay, isUser, userInteracted]);
+
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    };
+  }, []);
 
   const cleanTextForSpeech = (input) => {
     if (!input) return "";
 
     return input
-      .replace(/[#*_>`]/g, "") // remove markdown symbols
-      .replace(/\[(.*?)\]\((.*?)\)/g, "$1") // remove markdown links
-      .replace(/```[\s\S]*?```/g, "") // remove code blocks
-      .replace(/`([^`]+)`/g, "$1") // remove inline code
-      .replace(/\n+/g, ". ") // replace new lines with pauses
-      .replace(/\s+/g, " ") // normalize spaces
+      .replace(/[#*_>`]/g, "")
+      .replace(/\[(.*?)\]\((.*?)\)/g, "$1")
+      .replace(/```[\s\S]*?```/g, "")
+      .replace(/`([^`]+)`/g, "$1")
+      .replace(/\n+/g, ". ")
+      .replace(/\s+/g, " ")
       .trim();
   };
 
-  const speakMessage = async () => {
+  const playVoice = async () => {
     const audioEl = audioRef.current;
     if (!audioEl) return;
-
-    if (!audioEl.paused) {
-      audioEl.pause();
-      audioEl.currentTime = 0;
-      setSpeaking(false);
-      return;
-    }
 
     try {
       setLoading(true);
 
+      if (!audioEl.paused) {
+        audioEl.pause();
+        audioEl.currentTime = 0;
+        setSpeaking(false);
+        setLoading(false);
+        return;
+      }
+
       if (voice) {
-        audioEl.play();
+        await audioEl.play().catch(() => {});
         setSpeaking(true);
         setLoading(false);
         return;
@@ -63,14 +86,21 @@ export default function MessageBubble({ message }) {
 
       if (text) {
         const cleanText = cleanTextForSpeech(text);
+        const voiceSettings = JSON.parse(
+          localStorage.getItem("user"),
+        )?.voiceSettings;
+
         const res = await fetch(
+          // "http://localhost:3000/revision/text-to-speech",
           `https://companio-ai-backend-tripti-new.azurewebsites.net/revision/text-to-speech`,
           {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+            },
             body: JSON.stringify({
               text: cleanText,
-              voice: selectedVoice,
+              voiceSettings,
             }),
           },
         );
@@ -79,8 +109,8 @@ export default function MessageBubble({ message }) {
         const url = URL.createObjectURL(blob);
 
         audioEl.src = url;
-        await audioEl.play();
 
+        await audioEl.play().catch(() => {});
         setSpeaking(true);
       }
 
@@ -172,44 +202,31 @@ export default function MessageBubble({ message }) {
           </a>
         ))}
 
-        {!showText && voice && (
-          <audio
-            ref={audioRef}
-            controls
-            src={voice}
-            style={{ width: "220px", marginTop: 4 }}
-            onPlay={() => setSpeaking(true)}
-            onPause={() => setSpeaking(false)}
-            onEnded={() => setSpeaking(false)}
-          />
-        )}
-
+        <audio
+          ref={audioRef}
+          src={voice || ""}
+          style={{
+            display: showText ? "none" : "block",
+            width: "220px",
+            marginTop: 4,
+          }}
+          controls={!showText}
+          onPlay={() => setSpeaking(true)}
+          onPause={() => setSpeaking(false)}
+          onEnded={() => setSpeaking(false)}
+        />
         {!isUser && text && showText && (
           <div
             style={{
               display: "flex",
               alignItems: "center",
+              justifyContent: "flex-end",
               gap: 10,
               marginTop: 4,
             }}
           >
-            <select
-              value={selectedVoice}
-              onChange={(e) => setSelectedVoice(e.target.value)}
-              style={{
-                borderRadius: 6,
-                padding: "2px 6px",
-                fontSize: 12,
-                border: "1px solid #ddd",
-                cursor: "pointer",
-              }}
-            >
-              <option value="female">👩 Female</option>
-              <option value="male">👨 Male</option>
-            </select>
-
             <button
-              onClick={speakMessage}
+              onClick={playVoice}
               disabled={loading}
               style={{
                 border: "none",

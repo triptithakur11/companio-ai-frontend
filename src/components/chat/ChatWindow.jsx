@@ -1,10 +1,12 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
 import MessageBubble from "./MessageBubble";
 import ChatInput from "./ChatInput";
+import { ThemeContext } from "../../context/ThemeContext";
 
 export default function ChatWindow({ messages, setMessages, sendMessage }) {
   const [loading, setLoading] = useState(false);
   const [showScroll, setShowScroll] = useState(false);
+  const { theme } = useContext(ThemeContext);
 
   const messagesRef = useRef(null);
 
@@ -126,8 +128,8 @@ export default function ChatWindow({ messages, setMessages, sendMessage }) {
               width: 40,
               height: 40,
               border: "none",
-              background: "#000",
-              color: "#fff",
+              background: theme === "dark" ? "#fff" : "#000",
+              color: theme === "dark" ? "#000" : "#fff",
               cursor: "pointer",
             }}
           >
@@ -139,11 +141,12 @@ export default function ChatWindow({ messages, setMessages, sendMessage }) {
       <div
         style={{
           position: "sticky",
-          bottom: -20,
+          bottom: 0,
           background: "#fff",
           borderTop: "1px solid #eee",
           padding: 10,
           borderRadius: 10,
+          width: "100%",
         }}
       >
         <ChatInput onSend={handleSend} />

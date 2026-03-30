@@ -14,11 +14,12 @@ import {
   SaveOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import apiClient from "../../api/apiClient";
 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { ThemeContext } from "../../context/ThemeContext";
 
 const priorityOptions = [
   { label: "High", value: "high" },
@@ -37,6 +38,7 @@ const categoryOptions = [
 export default function GoalsTable({ data }) {
   const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(false);
+  const { theme } = useContext(ThemeContext);
 
   useEffect(() => {
     if (data) {
@@ -180,16 +182,33 @@ export default function GoalsTable({ data }) {
   return (
     <>
       <Flex justify="space-between" align="center" style={{ marginBottom: 16 }}>
-        <Button icon={<PlusOutlined />} onClick={addGoal}>
+        <Button
+          icon={<PlusOutlined />}
+          onClick={addGoal}
+          style={{
+            background: theme === "dark" ? "#001529" : "#fff",
+            color: theme === "dark" ? "#fff" : "#000",
+          }}
+        >
           Add Goal
         </Button>
         <Flex gap={4}>
-          <Button icon={<DownloadOutlined />} onClick={exportPDF}>
+          <Button
+            icon={<DownloadOutlined />}
+            onClick={exportPDF}
+            style={{
+              background: theme === "dark" ? "#001529" : "#fff",
+              color: theme === "dark" ? "#fff" : "#000",
+            }}
+          >
             Export PDF
           </Button>
           <Button
             icon={<SaveOutlined />}
-            type="primary"
+            style={{
+              background: theme === "dark" ? "#001529" : "#1677ff",
+              color: "#fff",
+            }}
             onClick={saveGoals}
             loading={loading}
           >
@@ -201,6 +220,7 @@ export default function GoalsTable({ data }) {
       <Table
         rowKey={(r, i) => i}
         columns={columns}
+        style={{ background: theme === "dark" ? "black" : "#fff" }}
         dataSource={goals}
         pagination={false}
         bordered

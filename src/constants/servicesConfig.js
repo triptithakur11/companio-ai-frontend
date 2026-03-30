@@ -13,7 +13,7 @@ export const SERVICES = {
   notes: {
     chatId: 2,
     agentId: "6",
-    name: "Smart Notes",
+    name: "Smart Notes Reconstruction",
     description: "Convert messy notes into structured study material.",
     icon: "FileTextOutlined",
     color: "#001529",
@@ -58,7 +58,7 @@ export const SERVICES = {
     chatId: 6,
     agentId: "5",
     name: "Human Support",
-    description: "Get help from mentors.",
+    description: "Get help from your campanion.",
     icon: "UserOutlined",
     color: "#001529",
     backgroundColor: "#fff",

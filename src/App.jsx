@@ -5,6 +5,7 @@ import Signup from "./pages/Signup";
 import AppLayout from "./components/layout/AppLayout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Service from "./pages/services/Service";
+import "./index.css";
 
 function App() {
   return (

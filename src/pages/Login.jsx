@@ -21,13 +21,15 @@ export default function Login() {
 
       localStorage.setItem("token", token);
 
+      const userRes = await apiClient.get("/user");
+      const user = userRes.data;
+      localStorage.setItem("user", JSON.stringify(user));
       message.success("Login successful");
       navigate("/");
     } catch (error) {
       message.error("Login failed");
       console.error(error);
-    }
-    finally {
+    } finally {
       setLoading(false);
     }
   };

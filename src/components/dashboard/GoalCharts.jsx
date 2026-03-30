@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   PieChart,
   Pie,
@@ -10,9 +10,11 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { ThemeContext } from "../../context/ThemeContext";
 
 export default function GoalCharts({ data }) {
   const [goals, setGoals] = useState([]);
+  const { theme } = useContext(ThemeContext);
 
   useEffect(() => {
     if (data) {
@@ -56,8 +58,10 @@ export default function GoalCharts({ data }) {
   }));
 
   return (
-    <div style={{ height: 480 }}>
-      <h4>Completion</h4>
+    <div
+      style={{ height: 480, background: theme === "dark" ? "#001529" : "#fff" }}
+    >
+      <h4 style={{ color: theme === "dark" ? "#fff" : "#000" }}>Completion</h4>
 
       <ResponsiveContainer width="100%" height={150}>
         <PieChart>
@@ -74,20 +78,25 @@ export default function GoalCharts({ data }) {
 
           <Tooltip />
 
-          {/* CENTER TEXT */}
           <text
             x="50%"
             y="50%"
             textAnchor="middle"
             dominantBaseline="middle"
-            style={{ fontSize: "18px", fontWeight: "bold", fill: "#333" }}
+            style={{
+              fontSize: "18px",
+              fontWeight: "bold",
+              fill: theme === "dark" ? "#fff" : "#000",
+            }}
           >
             {completionPercent}%
           </text>
         </PieChart>
       </ResponsiveContainer>
 
-      <h4 style={{ marginTop: 10 }}>Priority</h4>
+      <h4 style={{ marginTop: 10, color: theme === "dark" ? "#fff" : "#000" }}>
+        Priority
+      </h4>
 
       <ResponsiveContainer width="100%" height={120}>
         <BarChart data={priorityData}>
@@ -98,7 +107,9 @@ export default function GoalCharts({ data }) {
         </BarChart>
       </ResponsiveContainer>
 
-      <h4 style={{ marginTop: 10 }}>Category</h4>
+      <h4 style={{ marginTop: 10, color: theme === "dark" ? "#fff" : "#000" }}>
+        Category
+      </h4>
 
       <ResponsiveContainer width="100%" height={120}>
         <BarChart data={categoryData}>
